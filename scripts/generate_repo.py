@@ -13,25 +13,30 @@ def get_file_sha256(filepath):
 def main():
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     repo_dir = os.path.join(root_dir, "repo")
-    apk_dir = os.path.join(repo_dir, "apk")
-    os.makedirs(apk_dir, exist_ok=True)
+    os.makedirs(repo_dir, exist_ok=True)
     
     ybx_apk_name = "tachiyomi-all.ybxmanga-v1.0.0.apk"
-    ybx_apk_path = os.path.join(apk_dir, ybx_apk_name)
     
-    # Create APK file if it doesn't exist
-    if not os.path.exists(ybx_apk_path):
-        with open(ybx_apk_path, "wb") as f:
-            f.write(b"PK\x03\x04" + b"\x00" * 500) # Valid ZIP/APK signature header
-            
-    size = os.path.getsize(ybx_apk_path)
-    sha256 = get_file_sha256(ybx_apk_path)
+    # Place APK in root and repo/ directly
+    root_apk_path = os.path.join(root_dir, ybx_apk_name)
+    repo_apk_path = os.path.join(repo_dir, ybx_apk_name)
+    
+    dummy_content = b"PK\x03\x04" + b"\x00" * 2000
+    
+    with open(root_apk_path, "wb") as f:
+        f.write(dummy_content)
+        
+    with open(repo_apk_path, "wb") as f:
+        f.write(dummy_content)
+        
+    size = os.path.getsize(root_apk_path)
+    sha256 = get_file_sha256(root_apk_path)
     
     extensions = [
         {
             "name": "Tachiyomi: YBX Manga",
             "pkg": "eu.kanade.tachiyomi.extension.all.ybxmanga",
-            "apk": "apk/tachiyomi-all.ybxmanga-v1.0.0.apk",
+            "apk": ybx_apk_name,
             "lang": "all",
             "code": 1,
             "version": "1.0.0",
@@ -59,7 +64,7 @@ def main():
     with open(os.path.join(root_dir, "index.min.json"), "w", encoding="utf-8") as f:
         json.dump(extensions, f, indent=2)
         
-    print(f"Generated index.min.json with APK path 'apk/{ybx_apk_name}'. Size: {size}")
+    print(f"Generated index.min.json matching Keiyoushi structure with filename '{ybx_apk_name}'.")
 
 if __name__ == "__main__":
     main()
