@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="eu.kanade.tachiyomi.extension.all.ybxmanga">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:label="Tachiyomi: YBX Manga"
@@ -8,12 +7,18 @@
         android:icon="@android:drawable/sym_def_app_icon">
         <meta-data
             android:name="tachiyomi.extension.class"
-            android:value="eu.kanade.tachiyomi.extension.all.ybxmanga.YbxManga" />
+            android:value="eu.kanade.tachiyomi.extension.en.ybxmanga.YbxManga" />
         <meta-data
             android:name="tachiyomi.extension.factory"
             android:value="false" />
         <meta-data
             android:name="tachiyomi.extension.nsfw"
+            android:value="0" />
+        <meta-data
+            android:name="tachiyomi.extension.hasReadme"
+            android:value="0" />
+        <meta-data
+            android:name="tachiyomi.extension.hasChangelog"
             android:value="0" />
     </application>
 

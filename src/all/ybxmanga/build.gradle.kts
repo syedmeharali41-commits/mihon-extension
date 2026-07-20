@@ -10,11 +10,11 @@ ext {
 }
 
 android {
-    namespace = "eu.kanade.tachiyomi.extension.all.ybxmanga"
+    namespace = "eu.kanade.tachiyomi.extension.en.ybxmanga"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "eu.kanade.tachiyomi.extension.all.ybxmanga"
+        applicationId = "eu.kanade.tachiyomi.extension.en.ybxmanga"
         minSdk = 21
         targetSdk = 34
         versionCode = 1

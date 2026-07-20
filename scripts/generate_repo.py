@@ -23,20 +23,25 @@ def main():
     repo_dir = os.path.join(root_dir, "repo")
     os.makedirs(repo_dir, exist_ok=True)
     
-    ybx_apk_name = "tachiyomi-all.ybxmanga-v1.0.0.apk"
+    ybx_apk_name = "tachiyomi-en.ybxmanga-v1.0.0.apk"
     
-    root_apk_path = os.path.join(root_dir, ybx_apk_name)
-    repo_apk_path = os.path.join(repo_dir, ybx_apk_name)
-    
-    target_apk = repo_apk_path if os.path.exists(repo_apk_path) else root_apk_path
-    
-    if not os.path.exists(target_apk) or os.path.getsize(target_apk) < 5000:
+    # Search for compiled APK with fallback
+    target_apk = None
+    possible_names = [ybx_apk_name, "tachiyomi-all.ybxmanga-v1.0.0.apk"]
+    for folder in [repo_dir, root_dir]:
+        for name in possible_names:
+            p = os.path.join(folder, name)
+            if os.path.exists(p) and os.path.getsize(p) > 5000:
+                target_apk = p
+                break
+        if target_apk:
+            break
+            
+    if not target_apk:
+        target_apk = os.path.join(repo_dir, ybx_apk_name)
         dummy_content = b"PK\x03\x04" + b"\x00" * 100000
-        with open(root_apk_path, "wb") as f:
+        with open(target_apk, "wb") as f:
             f.write(dummy_content)
-        with open(repo_apk_path, "wb") as f:
-            f.write(dummy_content)
-        target_apk = repo_apk_path
 
     apk_size = os.path.getsize(target_apk)
     apk_sha256 = get_file_sha256(target_apk)
@@ -48,9 +53,9 @@ def main():
     extensions = [
         {
             "name": "Tachiyomi: YBX Manga",
-            "pkg": "eu.kanade.tachiyomi.extension.all.ybxmanga",
+            "pkg": "eu.kanade.tachiyomi.extension.en.ybxmanga",
             "apk": ybx_apk_name,
-            "lang": "all",
+            "lang": "en",
             "code": 1,
             "version": "1.0.0",
             "nsfw": 0,

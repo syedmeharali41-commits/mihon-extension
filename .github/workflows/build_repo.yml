@@ -41,16 +41,16 @@ jobs:
       - name: Collect APKs, Sign with v2/v3 Scheme and Generate Repo Index
         run: |
           mkdir -p repo
-          find src/all/ybxmanga/build/outputs/apk/ -name "*.apk" -exec cp {} repo/tachiyomi-all.ybxmanga-v1.0.0.apk \; || true
-          cp repo/tachiyomi-all.ybxmanga-v1.0.0.apk ./tachiyomi-all.ybxmanga-v1.0.0.apk || true
+          find src/all/ybxmanga/build/outputs/apk/ -name "*.apk" -exec cp {} repo/tachiyomi-en.ybxmanga-v1.0.0.apk \; || true
+          cp repo/tachiyomi-en.ybxmanga-v1.0.0.apk ./tachiyomi-en.ybxmanga-v1.0.0.apk || true
           
           # Locate apksigner in Android SDK
           APKSIGNER=$(find $ANDROID_HOME/build-tools/ -name "apksigner" | sort -V | tail -n 1)
           echo "Using apksigner at: $APKSIGNER"
           
           # Sign APK with v2/v3 scheme
-          $APKSIGNER sign --ks release.keystore --ks-key-alias mihonkey --ks-pass pass:mihonextensionpassword --key-pass pass:mihonextensionpassword repo/tachiyomi-all.ybxmanga-v1.0.0.apk
-          $APKSIGNER sign --ks release.keystore --ks-key-alias mihonkey --ks-pass pass:mihonextensionpassword --key-pass pass:mihonextensionpassword ./tachiyomi-all.ybxmanga-v1.0.0.apk
+          $APKSIGNER sign --ks release.keystore --ks-key-alias mihonkey --ks-pass pass:mihonextensionpassword --key-pass pass:mihonextensionpassword repo/tachiyomi-en.ybxmanga-v1.0.0.apk
+          $APKSIGNER sign --ks release.keystore --ks-key-alias mihonkey --ks-pass pass:mihonextensionpassword --key-pass pass:mihonextensionpassword ./tachiyomi-en.ybxmanga-v1.0.0.apk
           
           python3 scripts/generate_repo.py
 
@@ -66,8 +66,8 @@ jobs:
       - name: Sync updated files to main branch
         run: |
           git checkout main
-          git checkout repo -- index.min.json index.min.json.gz repo.json repo/tachiyomi-all.ybxmanga-v1.0.0.apk
-          cp repo/tachiyomi-all.ybxmanga-v1.0.0.apk ./tachiyomi-all.ybxmanga-v1.0.0.apk || true
-          git add index.min.json index.min.json.gz repo.json tachiyomi-all.ybxmanga-v1.0.0.apk
+          git checkout repo -- index.min.json index.min.json.gz repo.json repo/tachiyomi-en.ybxmanga-v1.0.0.apk
+          cp repo/tachiyomi-en.ybxmanga-v1.0.0.apk ./tachiyomi-en.ybxmanga-v1.0.0.apk || true
+          git add index.min.json index.min.json.gz repo.json tachiyomi-en.ybxmanga-v1.0.0.apk
           git commit -m "Sync compiled APK and repo index to main [skip ci]" || true
           git push origin main
