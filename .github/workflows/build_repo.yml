@@ -30,7 +30,7 @@ jobs:
       - name: Generate Signing Keystore and Extract Fingerprint
         run: |
           keytool -genkey -v -keystore release.keystore -alias mihonkey -keyalg RSA -keysize 2048 -validity 10000 -storepass mihonextensionpassword -keypass mihonextensionpassword -dname "CN=Mihon, OU=Extension, O=Mihon, L=City, S=State, C=US"
-          RAW_FINGERPRINT=$(keytool -list -v -keystore release.keystore -alias mihonkey -storepass mihonextensionpassword | grep "SHA256:" | head -n 1 | awk '{print $2}' | tr -d ':')
+          RAW_FINGERPRINT=$(keytool -exportcert -alias mihonkey -keystore release.keystore -storepass mihonextensionpassword | sha256sum | awk '{print $1}')
           echo "SIGNING_FINGERPRINT=$RAW_FINGERPRINT" >> $GITHUB_ENV
           echo "Generated Key Fingerprint: $RAW_FINGERPRINT"
 
