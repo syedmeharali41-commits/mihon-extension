@@ -2,4 +2,4 @@
 build/
 dist/
 .wrangler/
-*.apk
+!repo/apk/*.apk
