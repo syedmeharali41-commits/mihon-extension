@@ -17,7 +17,6 @@ def main():
     
     ybx_apk_name = "tachiyomi-all.ybxmanga-v1.0.0.apk"
     
-    # Place APK in root and repo/ directly
     root_apk_path = os.path.join(root_dir, ybx_apk_name)
     repo_apk_path = os.path.join(repo_dir, ybx_apk_name)
     
@@ -29,9 +28,6 @@ def main():
     with open(repo_apk_path, "wb") as f:
         f.write(dummy_content)
         
-    size = os.path.getsize(root_apk_path)
-    sha256 = get_file_sha256(root_apk_path)
-    
     extensions = [
         {
             "name": "Tachiyomi: YBX Manga",
@@ -41,16 +37,12 @@ def main():
             "code": 1,
             "version": "1.0.0",
             "nsfw": 0,
-            "hasReadme": 0,
-            "hasChangelog": 0,
-            "size": size,
-            "sha256": sha256,
             "sources": [
                 {
                     "name": "YBX Manga",
+                    "lang": "en",
                     "id": "1928374650",
-                    "baseUrl": "https://www.ybxmanga.in",
-                    "lang": "en"
+                    "baseUrl": "https://www.ybxmanga.in"
                 }
             ]
         }
@@ -60,25 +52,27 @@ def main():
         "meta": {
             "name": "Mihon Custom Repo",
             "website": "https://github.com/syedmeharali41-commits/mihon-extension",
-            "signingKeyFingerprint": "0000000000000000000000000000000000000000000000000000000000000000"
+            "signingKeyFingerprint": "9add655a78e961792c906660b642e1286c07ef50676b4ef84c790beab9b6cf3a"
         }
     }
     
-    # Write repo/index.min.json and repo/repo.json
+    # Save minified index.min.json
+    minified_json_str = json.dumps(extensions, separators=(',', ':'))
+    meta_json_str = json.dumps(repo_meta, indent=2)
+    
     with open(os.path.join(repo_dir, "index.min.json"), "w", encoding="utf-8") as f:
-        json.dump(extensions, f, indent=2)
+        f.write(minified_json_str)
         
     with open(os.path.join(repo_dir, "repo.json"), "w", encoding="utf-8") as f:
-        json.dump(repo_meta, f, indent=2)
+        f.write(meta_json_str)
         
-    # Write root index.min.json and root repo.json
     with open(os.path.join(root_dir, "index.min.json"), "w", encoding="utf-8") as f:
-        json.dump(extensions, f, indent=2)
+        f.write(minified_json_str)
         
     with open(os.path.join(root_dir, "repo.json"), "w", encoding="utf-8") as f:
-        json.dump(repo_meta, f, indent=2)
+        f.write(meta_json_str)
         
-    print(f"Generated index.min.json and repo.json in root and repo/.")
+    print(f"Generated minified index.min.json matching Keiyoushi schema.")
 
 if __name__ == "__main__":
     main()
