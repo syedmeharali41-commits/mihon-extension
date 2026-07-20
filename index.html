@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Mihon Extension Repository</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #090a0f;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --primary-grad: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 520px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 100px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #c084fc;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(to right, #ffffff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary-grad);
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(217, 70, 239, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(217, 70, 239, 0.4);
+        }
+
+        .repo-url-box {
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed var(--border);
+            padding: 12px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <span class="badge">Mihon / Tachiyomi Repository</span>
+        <h1>Custom Extensions</h1>
+        <p>Click below to automatically add this repository to your Mihon or Tachiyomi app for 1-click extension installs & updates.</p>
+
+        <div class="btn-group">
+            <a id="mihonBtn" href="#" class="btn btn-primary">
+                <span>⚡ Add to Mihon / Tachiyomi</span>
+            </a>
+        </div>
+
+        <div class="repo-url-box" id="repoUrl">
+            Repo Index URL:<br>
+            <strong style="color: #c084fc;" id="urlText">https://mihon-extension.pages.dev/index.min.json</strong>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = window.location.origin;
+        const repoUrl = baseUrl + '/index.min.json';
+        document.getElementById('urlText').innerText = repoUrl;
+        document.getElementById('mihonBtn').href = 'mihon://add-repo?url=' + encodeURIComponent(repoUrl);
+    </script>
+</body>
+</html>
