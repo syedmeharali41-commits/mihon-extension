@@ -34,15 +34,24 @@ jobs:
           echo "SIGNING_FINGERPRINT=$RAW_FINGERPRINT" >> $GITHUB_ENV
           echo "Generated Key Fingerprint: $RAW_FINGERPRINT"
 
-      - name: Build Signed APKs
+      - name: Build APKs
         run: |
           gradle assembleDebug
 
-      - name: Collect APKs and Generate Repo Index
+      - name: Collect APKs, Sign with v2/v3 Scheme and Generate Repo Index
         run: |
           mkdir -p repo
           find src/all/ybxmanga/build/outputs/apk/ -name "*.apk" -exec cp {} repo/tachiyomi-all.ybxmanga-v1.0.0.apk \; || true
           cp repo/tachiyomi-all.ybxmanga-v1.0.0.apk ./tachiyomi-all.ybxmanga-v1.0.0.apk || true
+          
+          # Locate apksigner in Android SDK
+          APKSIGNER=$(find $ANDROID_HOME/build-tools/ -name "apksigner" | sort -V | tail -n 1)
+          echo "Using apksigner at: $APKSIGNER"
+          
+          # Sign APK with v2/v3 scheme
+          $APKSIGNER sign --ks release.keystore --ks-key-alias mihonkey --ks-pass pass:mihonextensionpassword --key-pass pass:mihonextensionpassword repo/tachiyomi-all.ybxmanga-v1.0.0.apk
+          $APKSIGNER sign --ks release.keystore --ks-key-alias mihonkey --ks-pass pass:mihonextensionpassword --key-pass pass:mihonextensionpassword ./tachiyomi-all.ybxmanga-v1.0.0.apk
+          
           python3 scripts/generate_repo.py
 
       - name: Commit and Push to repo branch
@@ -51,5 +60,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b repo || git checkout repo
           git add -A
-          git commit -m "Auto-build signed extension APK and repo index [skip ci]" || true
+          git commit -m "Auto-build signed extension APK with v2/v3 scheme [skip ci]" || true
           git push origin repo --force

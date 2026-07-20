@@ -21,34 +21,6 @@ android {
         versionName = "1.0.0"
     }
 
-    signingConfigs {
-        create("release") {
-            val ksFile = file("${project.rootDir}/release.keystore")
-            if (ksFile.exists()) {
-                storeFile = ksFile
-                storePassword = "mihonextensionpassword"
-                keyAlias = "mihonkey"
-                keyPassword = "mihonextensionpassword"
-            }
-        }
-    }
-
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-            val ksFile = file("${project.rootDir}/release.keystore")
-            if (ksFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            }
-        }
-        getByName("debug") {
-            val ksFile = file("${project.rootDir}/release.keystore")
-            if (ksFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            }
-        }
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -61,7 +33,7 @@ android {
 
 dependencies {
     compileOnly(project(":core"))
-    implementation("org.jsoup:jsoup:1.17.2")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    compileOnly("org.jsoup:jsoup:1.17.2")
+    compileOnly("com.squareup.okhttp3:okhttp:4.12.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 }
