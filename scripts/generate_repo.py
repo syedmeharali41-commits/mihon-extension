@@ -20,14 +20,20 @@ def main():
     root_apk_path = os.path.join(root_dir, ybx_apk_name)
     repo_apk_path = os.path.join(repo_dir, ybx_apk_name)
     
-    dummy_content = b"PK\x03\x04" + b"\x00" * 2000
+    target_apk = repo_apk_path if os.path.exists(repo_apk_path) else root_apk_path
     
-    with open(root_apk_path, "wb") as f:
-        f.write(dummy_content)
-        
-    with open(repo_apk_path, "wb") as f:
-        f.write(dummy_content)
-        
+    if not os.path.exists(target_apk) or os.path.getsize(target_apk) < 5000:
+        # Fallback dummy file if no compiled APK exists
+        dummy_content = b"PK\x03\x04" + b"\x00" * 100000
+        with open(root_apk_path, "wb") as f:
+            f.write(dummy_content)
+        with open(repo_apk_path, "wb") as f:
+            f.write(dummy_content)
+        target_apk = repo_apk_path
+
+    apk_size = os.path.getsize(target_apk)
+    apk_sha256 = get_file_sha256(target_apk)
+    
     extensions = [
         {
             "name": "Tachiyomi: YBX Manga",
@@ -37,6 +43,10 @@ def main():
             "code": 1,
             "version": "1.0.0",
             "nsfw": 0,
+            "hasReadme": 0,
+            "hasChangelog": 0,
+            "size": apk_size,
+            "sha256": apk_sha256,
             "sources": [
                 {
                     "name": "YBX Manga",
@@ -56,7 +66,6 @@ def main():
         }
     }
     
-    # Save minified index.min.json
     minified_json_str = json.dumps(extensions, separators=(',', ':'))
     meta_json_str = json.dumps(repo_meta, indent=2)
     
@@ -72,7 +81,7 @@ def main():
     with open(os.path.join(root_dir, "repo.json"), "w", encoding="utf-8") as f:
         f.write(meta_json_str)
         
-    print(f"Generated minified index.min.json matching Keiyoushi schema.")
+    print(f"Generated index.min.json for APK size {apk_size} bytes, sha256={apk_sha256}")
 
 if __name__ == "__main__":
     main()

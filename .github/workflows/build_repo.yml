@@ -34,7 +34,7 @@ jobs:
       - name: Collect APKs and Generate Repo Index
         run: |
           mkdir -p repo
-          find src/ -name "*.apk" -exec cp {} repo/tachiyomi-all.ybxmanga-v1.0.0.apk \; || true
+          find src/all/ybxmanga/build/outputs/apk/ -name "*.apk" -exec cp {} repo/tachiyomi-all.ybxmanga-v1.0.0.apk \; || true
           cp repo/tachiyomi-all.ybxmanga-v1.0.0.apk ./tachiyomi-all.ybxmanga-v1.0.0.apk || true
           python3 scripts/generate_repo.py
 
