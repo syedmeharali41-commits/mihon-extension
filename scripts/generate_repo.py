@@ -2,6 +2,7 @@
 import os
 import json
 import hashlib
+import gzip
 import struct
 import sys
 
@@ -76,22 +77,21 @@ def main():
         }
     }
     
-    minified_json_str = json.dumps(extensions, separators=(',', ':'))
+    minified_json_bytes = json.dumps(extensions, separators=(',', ':')).encode('utf-8')
     meta_json_str = json.dumps(repo_meta, indent=2)
     
-    with open(os.path.join(repo_dir, "index.min.json"), "w", encoding="utf-8") as f:
-        f.write(minified_json_str)
+    # Write repo files
+    for directory in [root_dir, repo_dir]:
+        with open(os.path.join(directory, "index.min.json"), "wb") as f:
+            f.write(minified_json_bytes)
+            
+        with open(os.path.join(directory, "index.min.json.gz"), "wb") as f:
+            f.write(gzip.compress(minified_json_bytes))
+            
+        with open(os.path.join(directory, "repo.json"), "w", encoding="utf-8") as f:
+            f.write(meta_json_str)
         
-    with open(os.path.join(repo_dir, "repo.json"), "w", encoding="utf-8") as f:
-        f.write(meta_json_str)
-        
-    with open(os.path.join(root_dir, "index.min.json"), "w", encoding="utf-8") as f:
-        f.write(minified_json_str)
-        
-    with open(os.path.join(root_dir, "repo.json"), "w", encoding="utf-8") as f:
-        f.write(meta_json_str)
-        
-    print(f"Generated index.min.json with exact source_id={source_id}, apk_size={apk_size}, sha256={apk_sha256}")
+    print(f"Generated index.min.json & index.min.json.gz with source_id={source_id}, apk_size={apk_size}")
 
 if __name__ == "__main__":
     main()
