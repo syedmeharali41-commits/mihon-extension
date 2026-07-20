@@ -17,5 +17,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "mihon-ybxmanga-extension"
 
-include(":extensions:ybxmanga")
-project(":extensions:ybxmanga").projectDir = file("src/all/ybxmanga")
+include(":src:all:ybxmanga")
