@@ -12,14 +12,6 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-        google()
-        maven { url = java.net.URI("https://jitpack.io") }
-    }
-}
-
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
