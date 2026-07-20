@@ -27,7 +27,14 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Build APKs
+      - name: Generate Signing Keystore and Extract Fingerprint
+        run: |
+          keytool -genkey -v -keystore release.keystore -alias mihonkey -keyalg RSA -keysize 2048 -validity 10000 -storepass mihonextensionpassword -keypass mihonextensionpassword -dname "CN=Mihon, OU=Extension, O=Mihon, L=City, S=State, C=US"
+          RAW_FINGERPRINT=$(keytool -list -v -keystore release.keystore -alias mihonkey -storepass mihonextensionpassword | grep "SHA256:" | head -n 1 | awk '{print $2}' | tr -d ':')
+          echo "SIGNING_FINGERPRINT=$RAW_FINGERPRINT" >> $GITHUB_ENV
+          echo "Generated Key Fingerprint: $RAW_FINGERPRINT"
+
+      - name: Build Signed APKs
         run: |
           gradle assembleDebug
 
@@ -44,5 +51,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b repo || git checkout repo
           git add -A
-          git commit -m "Auto-build compiled extension APK and repo index [skip ci]" || true
+          git commit -m "Auto-build signed extension APK and repo index [skip ci]" || true
           git push origin repo --force

@@ -21,6 +21,34 @@ android {
         versionName = "1.0.0"
     }
 
+    signingConfigs {
+        create("release") {
+            val ksFile = file("${project.rootDir}/release.keystore")
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = "mihonextensionpassword"
+                keyAlias = "mihonkey"
+                keyPassword = "mihonextensionpassword"
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            val ksFile = file("${project.rootDir}/release.keystore")
+            if (ksFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+        getByName("debug") {
+            val ksFile = file("${project.rootDir}/release.keystore")
+            if (ksFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

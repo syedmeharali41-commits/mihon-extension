@@ -2,6 +2,7 @@
 import os
 import json
 import hashlib
+import sys
 
 def get_file_sha256(filepath):
     sha256_hash = hashlib.sha256()
@@ -23,7 +24,6 @@ def main():
     target_apk = repo_apk_path if os.path.exists(repo_apk_path) else root_apk_path
     
     if not os.path.exists(target_apk) or os.path.getsize(target_apk) < 5000:
-        # Fallback dummy file if no compiled APK exists
         dummy_content = b"PK\x03\x04" + b"\x00" * 100000
         with open(root_apk_path, "wb") as f:
             f.write(dummy_content)
@@ -33,6 +33,8 @@ def main():
 
     apk_size = os.path.getsize(target_apk)
     apk_sha256 = get_file_sha256(target_apk)
+    
+    fingerprint = os.environ.get("SIGNING_FINGERPRINT", "9add655a78e961792c906660b642e1286c07ef50676b4ef84c790beab9b6cf3a").lower().replace(":", "")
     
     extensions = [
         {
@@ -62,7 +64,7 @@ def main():
         "meta": {
             "name": "Mihon Custom Repo",
             "website": "https://github.com/syedmeharali41-commits/mihon-extension",
-            "signingKeyFingerprint": "9add655a78e961792c906660b642e1286c07ef50676b4ef84c790beab9b6cf3a"
+            "signingKeyFingerprint": fingerprint
         }
     }
     
@@ -81,7 +83,7 @@ def main():
     with open(os.path.join(root_dir, "repo.json"), "w", encoding="utf-8") as f:
         f.write(meta_json_str)
         
-    print(f"Generated index.min.json for APK size {apk_size} bytes, sha256={apk_sha256}")
+    print(f"Generated index.min.json for APK size {apk_size} bytes, sha256={apk_sha256}, fingerprint={fingerprint}")
 
 if __name__ == "__main__":
     main()
