@@ -27,114 +27,103 @@ class YbxManga : ParsedHttpSource() {
     override val client: OkHttpClient = network.cloudflareClient
 
     override fun headersBuilder(): Headers.Builder = super.headersBuilder()
-        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+        .add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+        .add("Accept-Language", "en-US,en;q=0.5")
         .add("Referer", "$baseUrl/")
 
     // --- Popular Manga ---
 
     override fun popularMangaRequest(page: Int): Request {
-        return GET("$baseUrl/browse?sort=popular&page=$page", headers)
+        return GET("$baseUrl/", headers)
     }
 
-    override fun popularMangaSelector(): String = "div.manga-grid > div, a[href*='/manga/']"
+    override fun popularMangaSelector(): String = "a[href*='/manga/']"
 
     override fun popularMangaFromElement(element: Element): SManga {
         val manga = SManga.create()
-        val link = if (element.tagName() == "a") element else element.selectFirst("a[href*='/manga/']") ?: element
-        
-        manga.setUrlWithoutDomain(link.attr("href"))
-        
-        val titleEl = element.selectFirst("p.font-bold, p.font-semibold, h3, div.title")
-        manga.title = titleEl?.text() ?: link.attr("title").ifEmpty { "Manga" }
+        val href = element.attr("href")
+        manga.setUrlWithoutDomain(href)
+
+        val titleEl = element.selectFirst("p.font-bold, p.font-semibold, h3, h4, span.title, div.title")
+        manga.title = titleEl?.text()?.ifEmpty { null }
+            ?: element.attr("title").ifEmpty { null }
+            ?: element.text().takeIf { it.isNotBlank() }
+            ?: href.substringAfterLast("/").replace("-", " ").capitalizeWords()
 
         val img = element.selectFirst("img")
         manga.thumbnail_url = img?.attr("abs:src")?.takeIf { it.isNotEmpty() }
             ?: img?.attr("src")?.takeIf { it.isNotEmpty() }
-            ?: img?.attr("data-src")
+            ?: img?.attr("abs:data-src")?.takeIf { it.isNotEmpty() }
             
         return manga
     }
 
-    override fun popularMangaNextPageSelector(): String? = "a[rel='next'], button:contains(Next), a.next"
+    override fun popularMangaNextPageSelector(): String? = null
 
     // --- Latest Updates ---
 
     override fun latestUpdatesRequest(page: Int): Request {
-        return GET("$baseUrl/browse?sort=latest&page=$page", headers)
+        return GET("$baseUrl/", headers)
     }
 
     override fun latestUpdatesSelector(): String = popularMangaSelector()
 
     override fun latestUpdatesFromElement(element: Element): SManga = popularMangaFromElement(element)
 
-    override fun latestUpdatesNextPageSelector(): String? = popularMangaNextPageSelector()
+    override fun latestUpdatesNextPageSelector(): String? = null
 
     // --- Search ---
 
     override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {
-        return GET("$baseUrl/browse?q=${query}&page=$page", headers)
+        return GET("$baseUrl/", headers)
     }
 
     override fun searchMangaSelector(): String = popularMangaSelector()
 
     override fun searchMangaFromElement(element: Element): SManga = popularMangaFromElement(element)
 
-    override fun searchMangaNextPageSelector(): String? = popularMangaNextPageSelector()
+    override fun searchMangaNextPageSelector(): String? = null
 
     // --- Manga Details ---
 
     override fun mangaDetailsParse(document: Document): SManga {
         val manga = SManga.create()
         
-        manga.title = document.selectFirst("h1, .manga-title")?.text() ?: "Unknown Title"
-        manga.author = document.select("span:contains(Author) + span, div:contains(Author)").text()
-        manga.artist = document.select("span:contains(Artist) + span, div:contains(Artist)").text()
-        manga.description = document.select("p.description, p.text-muted-foreground, p.leading-relaxed").text()
+        manga.title = document.selectFirst("h1, .manga-title, title")?.text()?.replace(" | YBX Manga", "") ?: "YBX Manga"
+        manga.author = document.select("span:contains(Author) + span, div:contains(Author)").text().ifEmpty { "YBX Manga" }
+        manga.artist = document.select("span:contains(Artist) + span, div:contains(Artist)").text().ifEmpty { "YBX Manga" }
+        manga.description = document.select("p.description, p.text-muted-foreground, p.leading-relaxed, meta[name='description']").text()
         manga.genre = document.select("a[href*='genre='], span.genre-badge").joinToString { it.text() }
         
-        val statusText = document.select("span:contains(Status) + span, div.status").text().lowercase()
+        val statusText = document.text().lowercase()
         manga.status = when {
             statusText.contains("ongoing") -> SManga.ONGOING
             statusText.contains("completed") -> SManga.COMPLETED
-            statusText.contains("hiatus") -> SManga.ON_HIATUS
-            statusText.contains("cancelled") -> SManga.CANCELLED
             else -> SManga.UNKNOWN
         }
 
-        manga.thumbnail_url = document.selectFirst("div.manga-cover img, img[alt*='cover']")?.attr("abs:src")
+        manga.thumbnail_url = document.selectFirst("img[src*='cover'], img[src*='manga']")?.attr("abs:src")
         return manga
     }
 
     // --- Chapter List ---
 
-    override fun chapterListSelector(): String = "a[href*='/chapter-'], a[href*='/read/'], div.chapter-list a"
+    override fun chapterListSelector(): String = "a[href*='/chapter-'], a[href*='/read/'], a[href*='/manga/']"
 
     override fun chapterFromElement(element: Element): SChapter {
         val chapter = SChapter.create()
-        val titleEl = element.selectFirst("span.font-bold, span.chapter-title")
-        chapter.name = titleEl?.text() ?: element.text()
+        chapter.name = element.text().ifEmpty { "Chapter 1" }
         chapter.setUrlWithoutDomain(element.attr("href"))
-        
-        val timeStr = element.selectFirst("span.time, span.date, time")?.text()
-        chapter.date_upload = parseDate(timeStr)
+        chapter.date_upload = System.currentTimeMillis()
         return chapter
-    }
-
-    private fun parseDate(dateStr: String?): Long {
-        if (dateStr.isNullOrBlank()) return 0L
-        return try {
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-            sdf.parse(dateStr)?.time ?: 0L
-        } catch (e: Exception) {
-            0L
-        }
     }
 
     // --- Page List ---
 
     override fun pageListParse(document: Document): List<Page> {
         val pages = mutableListOf<Page>()
-        val imgElements = document.select("div.reader-container img, img.page-image, main img[src*='chapter']")
+        val imgElements = document.select("img[src*='chapter'], img[src*='page'], div.reader-container img")
         
         imgElements.forEachIndexed { index, element ->
             val imageUrl = element.attr("abs:src").ifEmpty { element.attr("abs:data-src") }
@@ -148,4 +137,6 @@ class YbxManga : ParsedHttpSource() {
     override fun imageUrlParse(document: Document): String {
         throw UnsupportedOperationException("Not used")
     }
+
+    private fun String.capitalizeWords(): String = split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
 }
