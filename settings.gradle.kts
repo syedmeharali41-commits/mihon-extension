@@ -17,4 +17,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "mihon-ybxmanga-extension"
 
+include(":core")
 include(":src:all:ybxmanga")

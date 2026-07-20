@@ -1,24 +1,14 @@
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("kotlin-android")
 }
 
-ext {
-    set("appName", "Tachiyomi: YBX Manga")
-    set("pkgVersionCode", 1)
-    set("libVersion", "1.4")
-}
-
 android {
-    namespace = "eu.kanade.tachiyomi.extension.all.ybxmanga"
+    namespace = "eu.kanade.tachiyomi.lib"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "eu.kanade.tachiyomi.extension.all.ybxmanga"
         minSdk = 21
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
     }
 
     compileOptions {
@@ -32,7 +22,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
     implementation("org.jsoup:jsoup:1.17.2")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
