@@ -27,7 +27,7 @@ class YbxManga : ParsedHttpSource() {
     override val client: OkHttpClient = network.cloudflareClient
 
     override fun headersBuilder(): Headers.Builder = super.headersBuilder()
-        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
         .add("Referer", "$baseUrl/")
 
     // --- Popular Manga ---
@@ -36,22 +36,26 @@ class YbxManga : ParsedHttpSource() {
         return GET("$baseUrl/browse?sort=popular&page=$page", headers)
     }
 
-    override fun popularMangaSelector(): String = "a[href*='/manga/'], div.manga-card-hover a"
+    override fun popularMangaSelector(): String = "div.manga-grid > div, a[href*='/manga/']"
 
     override fun popularMangaFromElement(element: Element): SManga {
-        return SManga.create().apply {
-            val titleEl = element.selectFirst("p.font-bold, p.font-semibold, div.title")
-            title = titleEl?.text() ?: element.attr("title")
-            
-            val urlAttr = element.attr("href")
-            setUrlWithoutDomain(urlAttr)
+        val manga = SManga.create()
+        val link = if (element.tagName() == "a") element else element.selectFirst("a[href*='/manga/']") ?: element
+        
+        manga.setUrlWithoutDomain(link.attr("href"))
+        
+        val titleEl = element.selectFirst("p.font-bold, p.font-semibold, h3, div.title")
+        manga.title = titleEl?.text() ?: link.attr("title").ifEmpty { "Manga" }
 
-            val img = element.selectFirst("img")
-            thumbnail_url = img?.attr("abs:src") ?: img?.attr("src")
-        }
+        val img = element.selectFirst("img")
+        manga.thumbnail_url = img?.attr("abs:src")?.takeIf { it.isNotEmpty() }
+            ?: img?.attr("src")?.takeIf { it.isNotEmpty() }
+            ?: img?.attr("data-src")
+            
+        return manga
     }
 
-    override fun popularMangaNextPageSelector(): String? = "a[rel='next'], a.next-page"
+    override fun popularMangaNextPageSelector(): String? = "a[rel='next'], button:contains(Next), a.next"
 
     // --- Latest Updates ---
 
@@ -80,38 +84,44 @@ class YbxManga : ParsedHttpSource() {
     // --- Manga Details ---
 
     override fun mangaDetailsParse(document: Document): SManga {
-        return SManga.create().apply {
-            title = document.selectFirst("h1, .manga-title")?.text() ?: "Unknown Title"
-            author = document.select("span:contains(Author) + span, div:contains(Author)").text()
-            artist = document.select("span:contains(Artist) + span, div:contains(Artist)").text()
-            description = document.select("p.description, p.text-muted-foreground, p.leading-relaxed").text()
-            genre = document.select("a[href*='genre='], span.genre-badge").joinToString { it.text() }
-            
-            val statusText = document.select("span:contains(Status) + span").text().lowercase()
-            status = when {
-                statusText.contains("ongoing") -> SManga.ONGOING
-                statusText.contains("completed") -> SManga.COMPLETED
-                else -> SManga.UNKNOWN
-            }
-
-            thumbnail_url = document.selectFirst("div.manga-cover img, img[alt*='cover']")?.attr("abs:src")
+        val manga = SManga.create()
+        
+        manga.title = document.selectFirst("h1, .manga-title")?.text() ?: "Unknown Title"
+        manga.author = document.select("span:contains(Author) + span, div:contains(Author)").text()
+        manga.artist = document.select("span:contains(Artist) + span, div:contains(Artist)").text()
+        manga.description = document.select("p.description, p.text-muted-foreground, p.leading-relaxed").text()
+        manga.genre = document.select("a[href*='genre='], span.genre-badge").joinToString { it.text() }
+        
+        val statusText = document.select("span:contains(Status) + span, div.status").text().lowercase()
+        manga.status = when {
+            statusText.contains("ongoing") -> SManga.ONGOING
+            statusText.contains("completed") -> SManga.COMPLETED
+            statusText.contains("hiatus") -> SManga.ON_HIATUS
+            statusText.contains("cancelled") -> SManga.CANCELLED
+            else -> SManga.UNKNOWN
         }
+
+        manga.thumbnail_url = document.selectFirst("div.manga-cover img, img[alt*='cover']")?.attr("abs:src")
+        return manga
     }
 
-    // --- Chapters ---
+    // --- Chapter List ---
 
-    override fun chapterListSelector(): String = "a[href*='/chapter-'], a[href*='/read/'], div.chapter-item a"
+    override fun chapterListSelector(): String = "a[href*='/chapter-'], a[href*='/read/'], div.chapter-list a"
 
     override fun chapterFromElement(element: Element): SChapter {
-        return SChapter.create().apply {
-            name = element.selectFirst("span.font-bold, span.chapter-title")?.text() ?: element.text()
-            setUrlWithoutDomain(element.attr("href"))
-            date_upload = parseDate(element.selectFirst("span.time, span.date")?.text())
-        }
+        val chapter = SChapter.create()
+        val titleEl = element.selectFirst("span.font-bold, span.chapter-title")
+        chapter.name = titleEl?.text() ?: element.text()
+        chapter.setUrlWithoutDomain(element.attr("href"))
+        
+        val timeStr = element.selectFirst("span.time, span.date, time")?.text()
+        chapter.date_upload = parseDate(timeStr)
+        return chapter
     }
 
     private fun parseDate(dateStr: String?): Long {
-        if (dateStr.isNull_orEmpty()) return 0L
+        if (dateStr.isNullOrBlank()) return 0L
         return try {
             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
             sdf.parse(dateStr)?.time ?: 0L
@@ -119,8 +129,6 @@ class YbxManga : ParsedHttpSource() {
             0L
         }
     }
-
-    private fun String?.isNull_orEmpty(): Boolean = this == null || this.trim().isEmpty()
 
     // --- Page List ---
 
@@ -134,7 +142,6 @@ class YbxManga : ParsedHttpSource() {
                 pages.add(Page(index, "", imageUrl))
             }
         }
-        
         return pages
     }
 
