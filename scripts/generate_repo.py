@@ -56,15 +56,29 @@ def main():
         }
     ]
     
-    # Write repo/index.min.json
+    repo_meta = {
+        "meta": {
+            "name": "Mihon Custom Repo",
+            "website": "https://github.com/syedmeharali41-commits/mihon-extension",
+            "signingKeyFingerprint": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+    }
+    
+    # Write repo/index.min.json and repo/repo.json
     with open(os.path.join(repo_dir, "index.min.json"), "w", encoding="utf-8") as f:
         json.dump(extensions, f, indent=2)
         
-    # Write root index.min.json
+    with open(os.path.join(repo_dir, "repo.json"), "w", encoding="utf-8") as f:
+        json.dump(repo_meta, f, indent=2)
+        
+    # Write root index.min.json and root repo.json
     with open(os.path.join(root_dir, "index.min.json"), "w", encoding="utf-8") as f:
         json.dump(extensions, f, indent=2)
         
-    print(f"Generated index.min.json matching Keiyoushi structure with filename '{ybx_apk_name}'.")
+    with open(os.path.join(root_dir, "repo.json"), "w", encoding="utf-8") as f:
+        json.dump(repo_meta, f, indent=2)
+        
+    print(f"Generated index.min.json and repo.json in root and repo/.")
 
 if __name__ == "__main__":
     main()
