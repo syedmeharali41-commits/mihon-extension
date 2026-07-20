@@ -2,6 +2,7 @@
 import os
 import json
 import hashlib
+import struct
 import sys
 
 def get_file_sha256(filepath):
@@ -10,6 +11,11 @@ def get_file_sha256(filepath):
         for byte_block in iter(lambda: f.read(4096), b""):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
+
+def calculate_source_id(name, lang, version=1):
+    key = f"{name.lower()}/{lang}/{version}".encode("utf-8")
+    md5_bytes = hashlib.md5(key).digest()
+    return str(struct.unpack(">q", md5_bytes[:8])[0])
 
 def main():
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,6 +42,8 @@ def main():
     
     fingerprint = os.environ.get("SIGNING_FINGERPRINT", "9add655a78e961792c906660b642e1286c07ef50676b4ef84c790beab9b6cf3a").lower().replace(":", "")
     
+    source_id = calculate_source_id("ybx manga", "en", 1)
+    
     extensions = [
         {
             "name": "Tachiyomi: YBX Manga",
@@ -53,7 +61,7 @@ def main():
                 {
                     "name": "YBX Manga",
                     "lang": "en",
-                    "id": "1928374650",
+                    "id": source_id,
                     "baseUrl": "https://www.ybxmanga.in"
                 }
             ]
@@ -83,7 +91,7 @@ def main():
     with open(os.path.join(root_dir, "repo.json"), "w", encoding="utf-8") as f:
         f.write(meta_json_str)
         
-    print(f"Generated index.min.json for APK size {apk_size} bytes, sha256={apk_sha256}, fingerprint={fingerprint}")
+    print(f"Generated index.min.json with exact source_id={source_id}, apk_size={apk_size}, sha256={apk_sha256}")
 
 if __name__ == "__main__":
     main()
