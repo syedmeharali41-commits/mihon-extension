@@ -63,9 +63,11 @@ jobs:
           git commit -m "Auto-build signed extension APK with v2/v3 scheme [skip ci]" || true
           git push origin repo --force
 
-      - name: Sync updated files back to main branch
+      - name: Sync updated files to main branch
         run: |
           git checkout main
+          git checkout repo -- index.min.json index.min.json.gz repo.json repo/tachiyomi-all.ybxmanga-v1.0.0.apk
+          cp repo/tachiyomi-all.ybxmanga-v1.0.0.apk ./tachiyomi-all.ybxmanga-v1.0.0.apk || true
           git add index.min.json index.min.json.gz repo.json tachiyomi-all.ybxmanga-v1.0.0.apk
           git commit -m "Sync compiled APK and repo index to main [skip ci]" || true
           git push origin main
