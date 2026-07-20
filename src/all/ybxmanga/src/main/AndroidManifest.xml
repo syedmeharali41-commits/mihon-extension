@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="Tachiyomi: YBX Manga"
+        android:icon="@android:drawable/sym_def_app_icon">
+        <meta-data
+            android:name="tachiyomi.extension.class"
+            android:value="eu.kanade.tachiyomi.extension.all.ybxmanga.YbxManga" />
+        <meta-data
+            android:name="tachiyomi.extension.factory"
+            android:value="false" />
+        <meta-data
+            android:name="tachiyomi.extension.nsfw"
+            android:value="0" />
+    </application>
+
+</manifest>
