@@ -27,10 +27,9 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Generate Signing Keystore and Extract Fingerprint
+      - name: Extract Signing Keystore Fingerprint
         run: |
-          keytool -genkey -v -keystore release.keystore -alias mihonkey -keyalg RSA -keysize 2048 -validity 10000 -storepass mihonextensionpassword -keypass mihonextensionpassword -dname "CN=Mihon, OU=Extension, O=Mihon, L=City, S=State, C=US"
-          RAW_FINGERPRINT=$(keytool -exportcert -alias mihonkey -keystore release.keystore -storepass mihonextensionpassword | sha256sum | awk '{print $1}')
+          RAW_FINGERPRINT="2cdbbfd187eb507d2be2ed20fa0cbc79375de490b94a29fdeb4a93d7de2ec62d"
           echo "SIGNING_FINGERPRINT=$RAW_FINGERPRINT" >> $GITHUB_ENV
           echo "Generated Key Fingerprint: $RAW_FINGERPRINT"
 

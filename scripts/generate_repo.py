@@ -46,7 +46,7 @@ def main():
     apk_size = os.path.getsize(target_apk)
     apk_sha256 = get_file_sha256(target_apk)
     
-    fingerprint = os.environ.get("SIGNING_FINGERPRINT", "9add655a78e961792c906660b642e1286c07ef50676b4ef84c790beab9b6cf3a").lower().replace(":", "")
+    fingerprint = os.environ.get("SIGNING_FINGERPRINT", "2cdbbfd187eb507d2be2ed20fa0cbc79375de490b94a29fdeb4a93d7de2ec62d").lower().replace(":", "")
     
     source_id = calculate_source_id("ybx manga", "en", 1)
     

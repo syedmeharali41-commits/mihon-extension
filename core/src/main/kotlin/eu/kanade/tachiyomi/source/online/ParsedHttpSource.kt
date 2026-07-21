@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -11,21 +12,21 @@ import org.jsoup.nodes.Element
 
 abstract class ParsedHttpSource : HttpSource() {
 
-    abstract fun popularMangaSelector(): String
-    abstract fun popularMangaFromElement(element: Element): SManga
-    abstract fun popularMangaNextPageSelector(): String?
+    open fun popularMangaSelector(): String = ""
+    open fun popularMangaFromElement(element: Element): SManga = throw UnsupportedOperationException("Not implemented")
+    open fun popularMangaNextPageSelector(): String? = null
 
-    abstract fun latestUpdatesSelector(): String
-    abstract fun latestUpdatesFromElement(element: Element): SManga
-    abstract fun latestUpdatesNextPageSelector(): String?
+    open fun latestUpdatesSelector(): String = popularMangaSelector()
+    open fun latestUpdatesFromElement(element: Element): SManga = popularMangaFromElement(element)
+    open fun latestUpdatesNextPageSelector(): String? = popularMangaNextPageSelector()
 
-    abstract fun searchMangaSelector(): String
-    abstract fun searchMangaFromElement(element: Element): SManga
-    abstract fun searchMangaNextPageSelector(): String?
+    open fun searchMangaSelector(): String = popularMangaSelector()
+    open fun searchMangaFromElement(element: Element): SManga = popularMangaFromElement(element)
+    open fun searchMangaNextPageSelector(): String? = popularMangaNextPageSelector()
 
-    abstract fun mangaDetailsParse(document: Document): SManga
-    abstract fun chapterListSelector(): String
-    abstract fun chapterFromElement(element: Element): SChapter
-    abstract fun pageListParse(document: Document): List<Page>
-    abstract fun imageUrlParse(document: Document): String
+    open fun mangaDetailsParse(document: Document): SManga = throw UnsupportedOperationException("Not implemented")
+    open fun chapterListSelector(): String = ""
+    open fun chapterFromElement(element: Element): SChapter = throw UnsupportedOperationException("Not implemented")
+    open fun pageListParse(document: Document): List<Page> = throw UnsupportedOperationException("Not implemented")
+    open fun imageUrlParse(document: Document): String = throw UnsupportedOperationException("Not implemented")
 }
