@@ -121,12 +121,17 @@ class YbxManga : ParsedHttpSource() {
 
     override fun pageListParse(document: Document): List<Page> {
         val pages = mutableListOf<Page>()
-        val imgElements = document.select("img[src*='chapter'], img[src*='page'], div.reader-container img")
+        val imgElements = document.select("img[src*='chapter'], img[src*='page'], div.reader-container img, div.page-break img, .chapter-content img, main img")
         
-        imgElements.forEachIndexed { index, element ->
-            val imageUrl = element.attr("abs:src").ifEmpty { element.attr("abs:data-src") }
-            if (imageUrl.isNotEmpty()) {
-                pages.add(Page(index, "", imageUrl))
+        imgElements.forEach { element ->
+            val imageUrl = element.attr("abs:src")
+                .ifEmpty { element.attr("abs:data-src") }
+                .ifEmpty { element.attr("abs:data-lazy-src") }
+                .ifEmpty { element.attr("src") }
+                .ifEmpty { element.attr("data-src") }
+                
+            if (imageUrl.isNotEmpty() && !imageUrl.contains("logo") && !imageUrl.contains("avatar") && !imageUrl.contains("banner") && !imageUrl.contains("icon")) {
+                pages.add(Page(pages.size, "", imageUrl))
             }
         }
         return pages
