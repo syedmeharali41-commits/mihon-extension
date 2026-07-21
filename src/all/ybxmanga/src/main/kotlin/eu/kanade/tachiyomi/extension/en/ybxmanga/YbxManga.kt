@@ -43,7 +43,7 @@ class YbxManga : ParsedHttpSource() {
     }
 
     override fun popularMangaParse(response: Response): MangasPage {
-        val jsonStr = response.body.string()
+        val jsonStr = response.body?.string() ?: return MangasPage(emptyList(), false)
         val json = JSONObject(jsonStr)
         val dataObj = json.optJSONObject("data") ?: JSONObject()
         val mangaArray = dataObj.optJSONArray("data") ?: json.optJSONArray("data") ?: return MangasPage(emptyList(), false)
@@ -97,7 +97,7 @@ class YbxManga : ParsedHttpSource() {
     }
 
     override fun mangaDetailsParse(response: Response): SManga {
-        val jsonStr = response.body.string()
+        val jsonStr = response.body?.string() ?: ""
         val item = JSONObject(jsonStr)
         val manga = SManga.create()
         
@@ -148,7 +148,7 @@ class YbxManga : ParsedHttpSource() {
     }
 
     override fun chapterListParse(response: Response): List<SChapter> {
-        val jsonStr = response.body.string()
+        val jsonStr = response.body?.string() ?: ""
         val jsonArray = try {
             org.json.JSONArray(jsonStr)
         } catch (e: Exception) {
@@ -182,7 +182,7 @@ class YbxManga : ParsedHttpSource() {
     }
 
     override fun pageListParse(response: Response): List<Page> {
-        val jsonStr = response.body.string()
+        val jsonStr = response.body?.string() ?: ""
         val obj = JSONObject(jsonStr)
         val pagesArr = obj.optJSONArray("pages") ?: return emptyList()
 
